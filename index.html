@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="RL Smart Tic-Tac-Toe - An AI that learns through Monte Carlo Reinforcement Learning">
+    <title>RL Tic-Tac-Toe</title>
+    <link rel="stylesheet" href="src/presentation/views/style.css">
+</head>
+<body>
+    <div class="container">
+        
+        <header class="header">
+            <h1 class="title">RL Tic-Tac-Toe</h1>
+            <p class="subtitle">Monte Carlo Reinforcement Learning | Alpha-Beta Pruning</p>
+            <div class="turn-indicator" id="turnText">
+                <span>Your turn</span>
+            </div>
+        </header>
+        
+        <main class="main-layout">
+            
+            <div class="sidebar-left">
+                
+                <section class="panel">
+                    <div class="panel-header">
+                        <svg class="panel-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M18 20V10M12 20V4M6 20v-6"/>
+                        </svg>
+                        <h2 class="panel-title">Statistics</h2>
+                    </div>
+                    <div class="panel-content">
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-value wins" id="winsValue">0</div>
+                                <div class="stat-label">Wins</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value losses" id="lossesValue">0</div>
+                                <div class="stat-label">Losses</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value draws" id="drawsValue">0</div>
+                                <div class="stat-label">Draws</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value rate" id="winRateValue">0%</div>
+                                <div class="stat-label">Win Rate</div>
+                            </div>
+                        </div>
+                        
+                        <div class="winrate-section">
+                            <div class="winrate-header">
+                                <span class="winrate-label">Progress</span>
+                                <span class="winrate-value" id="winRateBar2">0%</span>
+                            </div>
+                            <div class="winrate-bar-bg">
+                                <div class="winrate-bar" id="winRateBar"></div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                
+                <section class="panel">
+                    <div class="panel-header">
+                        <svg class="panel-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                        </svg>
+                        <h2 class="panel-title">Learning Progress</h2>
+                    </div>
+                    <div class="panel-content">
+                        <div class="learning-stats">
+                            <div class="learning-item">
+                                <span class="learning-label">States Explored</span>
+                                <span class="learning-value" id="statesCount">0</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                
+            </div>
+            
+            <section class="game-area">
+                <div class="board-container">
+                    <div class="board">
+                        <div class="cell" data-index="0"></div>
+                        <div class="cell" data-index="1"></div>
+                        <div class="cell" data-index="2"></div>
+                        <div class="cell" data-index="3"></div>
+                        <div class="cell" data-index="4"></div>
+                        <div class="cell" data-index="5"></div>
+                        <div class="cell" data-index="6"></div>
+                        <div class="cell" data-index="7"></div>
+                        <div class="cell" data-index="8"></div>
+                    </div>
+                </div>
+                <button class="btn btn-primary new-game-btn" id="newGameBtn">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M23 4v6h-6M1 20v-6h6"/>
+                        <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
+                    </svg>
+                    New Game
+                </button>
+            </section>
+            
+            <div class="sidebar-right">
+                
+                <section class="panel">
+                    <div class="panel-header">
+                        <svg class="panel-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="3"/>
+                            <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/>
+                        </svg>
+                        <h2 class="panel-title">Settings</h2>
+                    </div>
+                    <div class="panel-content">
+                        <div class="setting-group">
+                            <label class="setting-label" for="difficultySelect">Difficulty</label>
+                            <select class="setting-select" id="difficultySelect">
+                                <option value="easy">Easy</option>
+                                <option value="medium" selected>Medium</option>
+                                <option value="hard">Hard</option>
+                            </select>
+                        </div>
+                        
+                        <div class="setting-group">
+                            <label class="setting-label" for="opponentSelect">AI Opponent</label>
+                            <select class="setting-select" id="opponentSelect">
+                                <option value="montecarlo">Monte Carlo (Learning)</option>
+                                <option value="alphabeta">Alpha-Beta (Perfect)</option>
+                            </select>
+                        </div>
+                        
+                        <div class="setting-group">
+                            <label class="setting-label" for="starterSelect">Starting Player</label>
+                            <select class="setting-select" id="starterSelect">
+                                <option value="human">Human (X)</option>
+                                <option value="ai">AI (O)</option>
+                            </select>
+                        </div>
+                        
+                        <div class="epsilon-card">
+                            <div class="epsilon-label">Exploration Rate (ε)</div>
+                            <div class="epsilon-value" id="epsilonValue">0.3</div>
+                        </div>
+                    </div>
+                </section>
+                
+                <section class="panel">
+                    <div class="panel-header">
+                        <svg class="panel-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+                        </svg>
+                        <h2 class="panel-title">Training</h2>
+                    </div>
+                    <div class="panel-content">
+                        <label class="training-label">Self-play games</label>
+                        <div class="training-row">
+                            <input type="number" class="training-input" id="trainGames" value="100" min="10" max="1000">
+                            <button class="btn btn-secondary train-btn" id="trainBtn">
+                                Train AI
+                            </button>
+                        </div>
+                        
+                        <div class="training-section">
+                            <button class="btn btn-danger btn-block" id="resetBtn">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="3 6 5 6 21 6"/>
+                                    <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+                                </svg>
+                                Reset All Learning
+                            </button>
+                        </div>
+                    </div>
+                </section>
+                
+            </div>
+            
+        </main>
+        
+        <footer class="footer">
+            Built by <strong>Team 6</strong>: Seba Assi, Reem Atamna, Yael Hazam
+        </footer>
+        
+    </div>
+    
+    <div class="modal" id="gameOverModal">
+        <div class="modal-content">
+            <div class="modal-icon" id="modalIcon">🎮</div>
+            <h2 class="modal-title" id="modalMessage">Game Over</h2>
+            <p class="modal-subtitle" id="modalSubtitle">Ready for another round?</p>
+            <button class="btn btn-primary" id="playAgainBtn">Play Again</button>
+        </div>
+    </div>
+    
+    <div class="modal" id="trainingModal">
+        <div class="modal-content">
+            <div class="spinner"></div>
+            <h2 class="modal-title">Training AI...</h2>
+            <p class="modal-subtitle">Running self-play games</p>
+        </div>
+    </div>
+    
+    <script src="src/infrastructure/repositories/StorageManager.js"></script>
+    <script src="src/application/services/SettingsManager.js"></script>
+    <script src="src/application/services/StatisticsManager.js"></script>
+    <script src="src/domain/entities/GameState.js"></script>
+    <script src="src/domain/domain-services/MonteCarloAgent.js"></script>
+    <script src="src/domain/domain-services/AlphaBetaAgent.js"></script>
+    <script src="src/application/services/GameEngine.js"></script>
+    <script src="src/presentation/controllers/UIController.js"></script>
+    
+</body>
+</html>
